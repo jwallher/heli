@@ -4,10 +4,7 @@
  */
 
 /* include the image we are using */
-#include "background.h"
-
-/* include the tile map we are using */
-#include "map.h"
+#include "HeliBack.h"
 
 /* the width and height of the screen */
 #define WIDTH 240
