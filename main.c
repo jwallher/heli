@@ -5,8 +5,8 @@
 #include "realHeli.h"
 
 /* include the sprite image we are using */
-#include "Wall.h"
 #include "realCopter.h"
+
 
 
 /* the tile mode flags needed for display control register */
@@ -132,13 +132,20 @@ void setup_background() {
     memcpy16_dma((unsigned short*) char_block(0), (unsigned short*) realHeli_data, (realHeli_width * realHeli_height) / 2);
 
     /* set all control the bits in this register */
-    *bg0_control = 0 |    /* priority, 0 is highest, 3 is lowest */
+    *bg0_control = 1 |    /* priority, 0 is highest, 3 is lowest */
         (0 << 2)  |       /* the char block the image data is stored in */
         (0 << 6)  |       /* the mosaic flag */
         (1 << 7)  |       /* color mode, 0 is 16 colors, 1 is 256 colors */
         (16 << 8) |       /* the screen block the tile data is stored in */
         (1 << 13) |       /* wrapping flag */
         (0 << 14);        /* bg size, 0 is 256x256 */
+
+    unsigned short* background =  screen_block(16);
+        for(int i = 0; i < 1024; i++)
+        {
+            background[i] = i;
+        }
+
 }
 /* just kill time */
 void delay(unsigned int amount) {
@@ -297,13 +304,10 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
 /* setup the sprite image and palette */
 void setup_sprite_image() {
     /* load the palette from the image into palette memory*/
-    memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) Wall_palette, PALETTE_SIZE);
     memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) realCopter_palette, PALETTE_SIZE);
       
-
     /* load the image into char block 0 */
-    memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) Wall_data, (Wall_width * Wall_height) / 2);
-    memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*)realCopter_data, (realCopter_width * realCopter_height) / 2);
+    memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) realCopter_data, (realCopter_width * realCopter_height) / 2);
 }
 /* a struct for the koopa's logic and behavior */
 struct Wall {
@@ -317,10 +321,8 @@ struct Wall {
     int frame;
 
     /* the number of frames to wait before flipping */
-    int animation_delay;
 
     /* the animation counter counts how many frames until we flip */
-    int counter;
     
     /* whether the wall is exploding or not */
     int explode;
@@ -330,44 +332,29 @@ struct Copter {
     struct Sprite* sprite;
     int x, y;
     int frame;
-    int animation_delay;
-    int counter;
     int move;
     int border;
 };
 
 void copter_init(struct Copter* copter) {
     copter->x = 50;
-    copter->y = 200;
+    copter->y = 50;
     copter->border = 40;
     copter->frame = 0;
     copter->move = 0;
-    copter->counter = 0;
-    copter->animation_delay = 8;
-    copter->sprite = sprite_init(copter->x, copter->y, SIZE_16_32, 0, 0, copter->frame, 0);
+    copter->sprite = sprite_init(copter->x, copter->y, SIZE_64_32, 0, 0, copter->frame, 0);
 }
 
 /* initialize the koopa */
 void wall_init(struct Wall* wall) {
      wall->x = 120;
      wall->y = 80;
-     wall->frame = 0;
+     wall->frame = 64;
      wall->explode = 0;
-     wall->counter = 0;
-     wall->animation_delay = 8;
-     wall->sprite = sprite_init(wall->x, wall->y, SIZE_16_32, 0, 0, wall->frame, 0);
-}
-
-/* explode wall if it */
-int wall_explode(struct Wall* wall) {
-    /* face left */
-    sprite_set_vertical_flip(wall->sprite, 1);
-    wall->explode = 1;
-
+     wall->sprite = sprite_init(wall->x, wall->y, SIZE_8_16, 0, 0, wall->frame, 0);
 }
 
 int copter_up(struct Copter* copter){
-    sprite_set_vertical_flip(copter->sprite, 1);
     copter->move = 1;
 
     if(copter->y > (SCREEN_HEIGHT - 40 - copter->border)) {
@@ -382,42 +369,35 @@ int copter_up(struct Copter* copter){
 void copter_fall(struct Copter* copter){
     copter->move = 0;
     copter->frame = 0;
-    copter->counter = 7;
     sprite_set_offset(copter->sprite, copter->frame);
 }
-/* update the koopa */
-void wall_update(struct Wall* wall) {
-    if (wall->explode) {
-        wall->counter++;
-        if (wall->counter >= wall->animation_delay) {
-             wall->frame = wall->frame + 16;
-             if (wall->frame > 16) {
-                 wall->frame = 0;
-             }
-             sprite_set_offset(wall->sprite, wall->frame);
-             wall->counter = 0;
-        }
+
+unsigned short tile_lookup(int x, int y, int xscroll, int yscroll, const unsigned short* tilemap, int tilemap_w, int tilemap_h) {
+    x += xscroll;
+    y += yscroll;
+
+    x >>= 3;
+    y >>= 3;
+
+    while (x >= tilemap_w){
+        x -= tilemap_w;
+    }
+    while (y >= tilemap_h){
+        y -= tilemap_h;
+    }
+    while (x < 0) {
+        y += tilemap_h;
+    }
+    while (y < 0) {
+        y += tilemap_h;
     }
 
-    sprite_position(wall->sprite, wall->x, wall->y);
+    int index = y * tilemap_w +x;
+
+    return tilemap[index];
 }
 
-void copter_update(struct Copter* copter){
-    if(copter->move){
-        copter->counter++;
-        if(copter->counter >= copter->animation_delay){
-            copter->frame = copter->frame +16;
-            if(copter->frame >16){
-                copter->frame = 0;
-            }
-            sprite_set_offset(copter->sprite, copter->frame);
-            copter->counter = 0;
-        }
-    }
-
-    sprite_position(copter->sprite, copter->x, copter->y);
-}
-/* the main function */
+/* update the wall */
 int main( ) {
    /* we set the mode to mode 0 with bg0 on */
    *display_control = MODE0 | BG0_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;
@@ -444,8 +424,8 @@ int main( ) {
    /* loop forever */
    while (1) {
         /* update the wall */
-        wall_update(&wall);
-        copter_update(&copter);
+        //wall_update(&wall);
+        //copter_update(&copter);
 
         if(button_pressed(BUTTON_UP)) {
             if(copter_up(&copter)) {
