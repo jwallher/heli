@@ -337,21 +337,23 @@ struct Copter {
 };
 
 void copter_init(struct Copter* copter) {
-    copter->x = 50;
-    copter->y = 50;
-    copter->border = 40;
+    copter->x = 30;
+    copter->y = 120;
+    copter->border = 18;
     copter->frame = 0;
     copter->move = 0;
-    copter->sprite = sprite_init(copter->x, copter->y, SIZE_64_32, 0, 0, copter->frame, 0);
+    copter->sprite = sprite_init(copter->x, copter->y, SIZE_16_16, 0, 0, copter->frame, 0);
 }
 
 /* initialize the koopa */
 void wall_init(struct Wall* wall) {
-     wall->x = 120;
-     wall->y = 80;
-     wall->frame = 64;
+     wall->x = 80;
+     wall->y = 70;
+     wall->frame = 8;
      wall->explode = 0;
-     wall->sprite = sprite_init(wall->x, wall->y, SIZE_8_16, 0, 0, wall->frame, 0);
+     wall->sprite = sprite_init(wall->x, wall->y, SIZE_16_16, 0, 0, wall->frame, 0);
+     wall->sprite = sprite_init(wall->x + 60, wall->y -30, SIZE_16_16, 0, 0, wall->frame, 0);
+     wall->sprite = sprite_init(wall->x + 120, wall->y +30, SIZE_16_16, 0, 0, wall->frame, 0);
 }
 
 int copter_up(struct Copter* copter){
@@ -429,10 +431,11 @@ int main( ) {
 
         if(button_pressed(BUTTON_UP)) {
             if(copter_up(&copter)) {
-                yscroll ++;
+                xscroll ++;
             }
         }else{
             copter_fall(&copter);
+            xscroll ++;
         }
 
         /* wait for vblank before scrolling and moving sprites */
