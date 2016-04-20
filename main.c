@@ -316,6 +316,7 @@ struct Wall {
 
     /* the x and y postion */
     int x, y;
+	int origx, origy;
 
     /* which frame of the animation he is on */
     int frame;
@@ -349,6 +350,8 @@ void copter_init(struct Copter* copter) {
 void wall_init(struct Wall* wall, int x, int y) {
      wall->x = x;//80
      wall->y = y;//70
+	 wall->origx = x;
+	 wall->origy = y;
      wall->frame = 8;
      wall->explode = 0;
      wall->sprite = sprite_init(wall->x, wall->y, SIZE_16_16, 0, 0, wall->frame, 0);
@@ -360,6 +363,7 @@ int wall_left(struct Wall* wal){
 	//wal->move = 1;
 	if(wal->x<0){
 		//delete wall somehow?
+		wal->x=wal->origx;
 		//or move it back to the right side of the screen in a infinite loop like thing?
 		return 1;
 	}
