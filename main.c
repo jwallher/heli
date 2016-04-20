@@ -445,9 +445,11 @@ int main( ) {
         copter_update(&copter);
         if(button_pressed(BUTTON_UP)) {
         	copter_up(&copter);
+			xscroll++;
             	//good way to start the game?
         }else{
             copter_fall(&copter);
+			xscroll++;
             
         }
 		//copter moves up and down decent. starts choppy, but get smoother the longer the game runs
