@@ -345,16 +345,30 @@ void copter_init(struct Copter* copter) {
     copter->sprite = sprite_init(copter->x, copter->y, SIZE_16_16, 0, 0, copter->frame, 0);
 }
 
-/* initialize the koopa */
-void wall_init(struct Wall* wall) {
-     wall->x = 80;
-     wall->y = 70;
+/* initialize the koopa */ //added x and y so function can be reused for multiple walls.
+void wall_init(struct Wall* wall, int x, int y) {
+     wall->x = x;//80
+     wall->y = y;//70
      wall->frame = 8;
      wall->explode = 0;
      wall->sprite = sprite_init(wall->x, wall->y, SIZE_16_16, 0, 0, wall->frame, 0);
-     wall->sprite = sprite_init(wall->x + 60, wall->y -30, SIZE_16_16, 0, 0, wall->frame, 0);
-     wall->sprite = sprite_init(wall->x + 120, wall->y +30, SIZE_16_16, 0, 0, wall->frame, 0);
+     //wall->sprite = sprite_init(wall->x + 60, wall->y -30, SIZE_16_16, 0, 0, wall->frame, 0);
+     //wall->sprite = sprite_init(wall->x + 120, wall->y +30, SIZE_16_16, 0, 0, wall->frame, 0);
 }
+
+int wall_left(struct Wall* wal){
+	//wal->move = 1;
+	if(wal->x<0){
+		//delete wall somehow?
+		//or move it back to the right side of the screen in a infinite loop like thing?
+		return 1;
+	}
+	else{
+		wal->x--;
+		return 0;
+	}
+}
+
 
 int copter_up(struct Copter* copter){
     copter->move = 1;
@@ -414,6 +428,10 @@ void copter_update(struct Copter *cop){
 	sprite_position(cop->sprite, cop->x, cop->y);
 }
 
+void wall_update(struct Wall *wal){
+	sprite_position(wal->sprite, wal->x, wal->y);
+}
+
 /* update the wall */
 int main( ) {
    /* we set the mode to mode 0 with bg0 on */
@@ -429,8 +447,13 @@ int main( ) {
    sprite_clear();
 
    /* create the koopa */
-   struct Wall wall;
-   wall_init(&wall);
+   struct Wall wallA;
+   struct Wall wallB;
+   struct Wall wally; //sorry I really wanted one to be named wall-ie
+   wall_init(&wallA,240,40);
+   wall_init(&wallB,320,70);
+   wall_init(&wally,360,100);
+
    struct Copter copter;
    copter_init(&copter);
 
@@ -441,12 +464,21 @@ int main( ) {
    /* loop forever */
    while (1) {
         /* update the wall */
-        //wall_update(&wall);
+        wall_update(&wallA);
+		wall_update(&wallB);
+		wall_update(&wally);
+
+		wall_left(&wallA);
+		wall_left(&wallB);
+		wall_left(&wally);
+
         copter_update(&copter);
-        if(button_pressed(BUTTON_UP)) {
+        if(button_pressed(BUTTON_A)){ //reset button...***** REMOVE LATER ******
+			return 0;
+		}
+		else if(button_pressed(BUTTON_UP)) {
         	copter_up(&copter);
 			xscroll++;
-            	//good way to start the game?
         }else{
             copter_fall(&copter);
 			xscroll++;
