@@ -525,7 +525,8 @@ int main( ) {
 		//check collision:
 		for(i=0;i<3;i++){//walls are 8 pixels long right?    Walls are 3 pixels wide by 8 pixels height
 			//check x
-			if(walls[i].x == (copter.x+copter.border)){
+			//if(walls[i].x == (copter.x+copter.border)){
+			if((walls[i].x<= (copter.x+copter.border)) && (walls[i].x>=copter.x)){
 				//check y
 				if((copter.y >= walls[i].y) && (copter.y <= walls[i].y+8)){
 						//collition!
