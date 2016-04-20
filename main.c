@@ -360,17 +360,19 @@ int copter_up(struct Copter* copter){
     copter->move = 1;
 
     //if(copter->y > (SCREEN_HEIGHT - 40 - copter->border)) {
-	if(copter->y < 0+10){
+	if(copter->y <  0+20){
+		copter->move=0;
         return 1;
     } else{
-        copter->y--;
+        copter->y-=2;
         return 0;
     }
 }
 
 int copter_fall(struct Copter* copter){
 	copter->move =1;
-	if(copter->y > (SCREEN_HEIGHT -40 - copter->border)){
+	if(copter->y > (SCREEN_HEIGHT -20 - copter->border)){
+		copter->move=0;
 		return 1;
 	} else{
 		copter->y++;
@@ -444,11 +446,11 @@ int main( ) {
 
         if(button_pressed(BUTTON_UP)) {
         	copter_up(&copter);
-            xscroll=1;
+            xscroll=5;	//good way to start the game?
         }else{
             copter_fall(&copter);
         }
-
+		//copter moves up and down decent. starts choppy, but get smoother the longer the game runs
         /* wait for vblank before scrolling and moving sprites */
         wait_vblank();
         *bg0_x_scroll = xscroll;
