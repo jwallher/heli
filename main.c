@@ -443,12 +443,12 @@ int main( ) {
         /* update the wall */
         //wall_update(&wall);
         copter_update(&copter);
-
         if(button_pressed(BUTTON_UP)) {
         	copter_up(&copter);
-            xscroll=5;	//good way to start the game?
+            	//good way to start the game?
         }else{
             copter_fall(&copter);
+            
         }
 		//copter moves up and down decent. starts choppy, but get smoother the longer the game runs
         /* wait for vblank before scrolling and moving sprites */
