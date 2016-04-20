@@ -359,19 +359,28 @@ void wall_init(struct Wall* wall) {
 int copter_up(struct Copter* copter){
     copter->move = 1;
 
-    if(copter->y > (SCREEN_HEIGHT - 40 - copter->border)) {
+    //if(copter->y > (SCREEN_HEIGHT - 40 - copter->border)) {
+	if(copter->y < 0+10){
         return 1;
-    }else{
-        copter->y++;
+    } else{
+        copter->y--;
         return 0;
     }
 }
 
-
-void copter_fall(struct Copter* copter){
+int copter_fall(struct Copter* copter){
+	copter->move =1;
+	if(copter->y > (SCREEN_HEIGHT -40 - copter->border)){
+		return 1;
+	} else{
+		copter->y++;
+		return 0;
+	}
+	/*
     copter->move = 0;
     copter->frame = 0;
     sprite_set_offset(copter->sprite, copter->frame);
+	*/
 }
 
 unsigned short tile_lookup(int x, int y, int xscroll, int yscroll, const unsigned short* tilemap, int tilemap_w, int tilemap_h) {
@@ -397,6 +406,10 @@ unsigned short tile_lookup(int x, int y, int xscroll, int yscroll, const unsigne
     int index = y * tilemap_w +x;
 
     return tilemap[index];
+}
+//copter updatea
+void copter_update(struct Copter *cop){
+	sprite_position(cop->sprite, cop->x, cop->y);
 }
 
 /* update the wall */
@@ -427,15 +440,13 @@ int main( ) {
    while (1) {
         /* update the wall */
         //wall_update(&wall);
-        //copter_update(&copter);
+        copter_update(&copter);
 
         if(button_pressed(BUTTON_UP)) {
-            if(copter_up(&copter)) {
-                xscroll ++;
-            }
+        	copter_up(&copter);
+            xscroll=1;
         }else{
             copter_fall(&copter);
-            xscroll ++;
         }
 
         /* wait for vblank before scrolling and moving sprites */
