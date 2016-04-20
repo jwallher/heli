@@ -451,12 +451,17 @@ int main( ) {
    sprite_clear();
 
    /* create the koopa */
-   struct Wall wallA;
+   /*struct Wall wallA;
    struct Wall wallB;
-   struct Wall wally; //sorry I really wanted one to be named wall-ie
-   wall_init(&wallA,240,40);
+   struct Wall wally; //sorry I really wanted one to be named wall-ie */ //yes, I did just comment my comment. sue me. 
+   struct Wall walls[3];
+	//sorry I'm a comment everything kinda guy
+   wall_init(&walls[0],240,40);
+   wall_init(&walls[1],320,70);
+   wall_init(&walls[2],360,100);
+  /* wall_init(&wallA,240,40);
    wall_init(&wallB,320,70);
-   wall_init(&wally,360,100);
+   wall_init(&wally,360,100);*/
 
    struct Copter copter;
    copter_init(&copter);
@@ -468,13 +473,21 @@ int main( ) {
    /* loop forever */
    while (1) {
         /* update the wall */
-        wall_update(&wallA);
+        /*wall_update(&wallA);
 		wall_update(&wallB);
-		wall_update(&wally);
-
-		wall_left(&wallA);
+		wall_update(&wally);*/
+	   	int i;
+		for(i=0;i<3;i++){
+			wall_update(&walls[i]);
+		}
+		
+		for(i=0;i<3;i++){
+			wall_left(&walls[i]);
+		}
+		/*wall_left(&wallA);
 		wall_left(&wallB);
-		wall_left(&wally);
+		wall_left(&wally);*/
+		//If all my commented code bothers you please delete it. 
 
         copter_update(&copter);
         if(button_pressed(BUTTON_A)){ //reset button...***** REMOVE LATER ******
@@ -488,6 +501,18 @@ int main( ) {
 			xscroll++;
             
         }
+		//check collision:
+		for(i=0;i<3;i++){//walls are 8 pixels long right?
+			//check x
+			if(walls[i].x == (copter.x+copter.border)){
+				//check y
+				if((copter.y >= walls[i].y) && (copter.y <= walls[i].y+8)){
+						//collition!
+						return 0;
+				}
+			}
+		}
+
 		//copter moves up and down decent. starts choppy, but get smoother the longer the game runs
         /* wait for vblank before scrolling and moving sprites */
         wait_vblank();
