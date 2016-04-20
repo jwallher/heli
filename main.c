@@ -1,6 +1,7 @@
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 160
 
+#include <stdio.h>
 /* include the background image we are using */
 #include "realHeli.h"
 
@@ -97,6 +98,8 @@ volatile unsigned short* char_block(unsigned long block) {
 volatile unsigned short* screen_block(unsigned long block) {
     /* they are each 2K big */
     return (volatile unsigned short*) (0x6000000 + (block * 0x800));
+
+    
 }
 
 /* flag for turning on DMA */
@@ -403,6 +406,18 @@ int copter_fall(struct Copter* copter){
 	*/
 }
 
+void set_text(char* str, int row, int col){
+    int index = row * 32 + col;
+    int missing = 32;
+    volatile unsigned short* ptr = screen_block(24);
+    while (*str) {
+        ptr[index] = *str - missing;
+        index ++;
+        str ++;
+    }
+}
+
+
 unsigned short tile_lookup(int x, int y, int xscroll, int yscroll, const unsigned short* tilemap, int tilemap_w, int tilemap_h) {
     x += xscroll;
     y += yscroll;
@@ -436,6 +451,8 @@ void wall_update(struct Wall *wal){
 	sprite_position(wal->sprite, wal->x, wal->y);
 }
 
+
+void uppercase(char* s);
 /* update the wall */
 int main( ) {
    /* we set the mode to mode 0 with bg0 on */
@@ -449,6 +466,10 @@ int main( ) {
 
    /* clear all the sprites on screen now */
    sprite_clear();
+
+   char msg [32] = "Helicopter";
+   uppercase(msg);
+   set_text(msg, 0, 0);
 
    /* create the koopa */
    /*struct Wall wallA;
@@ -502,7 +523,7 @@ int main( ) {
             
         }
 		//check collision:
-		for(i=0;i<3;i++){//walls are 8 pixels long right?
+		for(i=0;i<3;i++){//walls are 8 pixels long right?    Walls are 3 pixels wide by 8 pixels height
 			//check x
 			if(walls[i].x == (copter.x+copter.border)){
 				//check y
