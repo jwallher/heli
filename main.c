@@ -12,7 +12,9 @@
 
 /* the tile mode flags needed for display control register */
 #define MODE0 0x00
+#define MODE1 0x01
 #define BG0_ENABLE 0x100
+#define BG1_ENABLE 0x200
 
 /* flags to set sprite handling in display control register */
 #define SPRITE_MAP_2D 0x0
@@ -22,7 +24,7 @@
 
 /* the control registers for the four tile layers */
 volatile unsigned short* bg0_control = (volatile unsigned short*) 0x4000008;
-
+volatile unsigned short* bg1_control = (volatile unsigned short*) 0x400000a;
 /* palette is always 256 colors */
 #define PALETTE_SIZE 256
 
@@ -135,7 +137,7 @@ void setup_background() {
     memcpy16_dma((unsigned short*) char_block(0), (unsigned short*) realHeli_data, (realHeli_width * realHeli_height) / 2);
 
     /* set all control the bits in this register */
-    *bg0_control = 1 |    /* priority, 0 is highest, 3 is lowest */
+    *bg0_control = 2 |    /* priority, 0 is highest, 3 is lowest */
         (0 << 2)  |       /* the char block the image data is stored in */
         (0 << 6)  |       /* the mosaic flag */
         (1 << 7)  |       /* color mode, 0 is 16 colors, 1 is 256 colors */
@@ -143,12 +145,25 @@ void setup_background() {
         (1 << 13) |       /* wrapping flag */
         (0 << 14);        /* bg size, 0 is 256x256 */
 
+    *bg1_control = 1 |
+        (0 << 2)  |
+        (0 << 6)  |
+        (1 << 7)  |
+        (24 << 8) |
+        (1 << 13) |
+        (0 << 14);
+
+
     unsigned short* background =  screen_block(16);
         for(int i = 0; i < 1024; i++)
         {
             background[i] = i;
         }
 
+       background = screen_block(24);
+       for(int i = 0; i < 32 * 32; i++){
+           background[i] = 0;
+       }
 }
 /* just kill time */
 void delay(unsigned int amount) {
@@ -456,7 +471,7 @@ void uppercase(char* s);
 /* update the wall */
 int main( ) {
    /* we set the mode to mode 0 with bg0 on */
-   *display_control = MODE0 | BG0_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;
+   *display_control = MODE0 | BG0_ENABLE | BG1_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;
 
    /* setup the background 0 */
    setup_background();
@@ -469,7 +484,7 @@ int main( ) {
 
    char msg [32] = "Helicopter";
    uppercase(msg);
-   set_text(msg, 0, 0);
+   set_text(msg, 50, 50);
 
    /* create the koopa */
    /*struct Wall wallA;
@@ -520,7 +535,6 @@ int main( ) {
         }else{
             copter_fall(&copter);
 			xscroll++;
-            
         }
 		//check collision:
 		for(i=0;i<3;i++){//walls are 8 pixels long right?    Walls are 3 pixels wide by 8 pixels height
@@ -538,7 +552,7 @@ int main( ) {
 		//copter moves up and down decent. starts choppy, but get smoother the longer the game runs
         /* wait for vblank before scrolling and moving sprites */
         wait_vblank();
-        *bg0_x_scroll = xscroll;
+       // *bg0_x_scroll = xscroll;
         sprite_update_all();
 
         /* delay some */
