@@ -531,10 +531,7 @@ int main( ) {
 		//If all my commented code bothers you please delete it. 
 
         copter_update(&copter);
-        if(button_pressed(BUTTON_A)){ //reset button...***** REMOVE LATER ******
-			return 0;
-		}
-		else if(button_pressed(BUTTON_UP)) {
+		if(button_pressed(BUTTON_UP)) {
         	copter_up(&copter);
 			xscroll++;
         }else{
