@@ -162,7 +162,7 @@ void setup_background() {
 
        background = screen_block(24);
        for(int i = 0; i < 32 * 32; i++){
-           background[i] = 0;
+           background[i] = i;
        }
 }
 /* just kill time */
