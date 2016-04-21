@@ -4,6 +4,7 @@
 #include <stdio.h>
 /* include the background image we are using */
 #include "realHeli.h"
+#include "background.h"
 
 /* include the sprite image we are using */
 #include "realCopter.h"
@@ -141,28 +142,29 @@ void setup_background() {
         (0 << 2)  |       /* the char block the image data is stored in */
         (0 << 6)  |       /* the mosaic flag */
         (1 << 7)  |       /* color mode, 0 is 16 colors, 1 is 256 colors */
-        (16 << 8) |       /* the screen block the tile data is stored in */
+        (30 << 8) |       /* the screen block the tile data is stored in */
         (1 << 13) |       /* wrapping flag */
         (0 << 14);        /* bg size, 0 is 256x256 */
+    
+    //memcpy16_dma((unsigned short*) bg_palette, (unsigned short*) background_palette, PALETTE_SIZE);
 
+    memcpy16_dma((unsigned short*) char_block(3), (unsigned short*) background_data, (background_width * background_height) / 2);
     *bg1_control = 1 |
-        (0 << 2)  |
+        (3 << 2)  |
         (0 << 6)  |
         (1 << 7)  |
-        (24 << 8) |
+        (31 << 8) |
         (1 << 13) |
         (0 << 14);
 
+    unsigned short* background = screen_block(30);
+    for(int i = 0; i < 1024; i++){
+        background[i] = i;
+    }
 
-    unsigned short* background =  screen_block(16);
-        for(int i = 0; i < 1024; i++)
-        {
-            background[i] = i;
-        }
-
-       background = screen_block(24);
+     background =  screen_block(31);
        for(int i = 0; i < 32 * 32; i++){
-           background[i] = i;
+           background[i] = 0;
        }
 }
 /* just kill time */
@@ -429,11 +431,11 @@ int copter_fall(struct Copter* copter){
 void set_text(char* str, int row, int col){
     int index = row * 32 + col;
     int missing = 32;
-    volatile unsigned short* ptr = screen_block(24);
+    volatile unsigned short* background = screen_block(31);
     while (*str) {
-        ptr[index] = *str - missing;
-        index ++;
-        str ++;
+        background[index] = *str - missing;
+        index++;
+        str++;
     }
 }
 
@@ -473,6 +475,7 @@ void wall_update(struct Wall *wal){
 
 
 void uppercase(char* s);
+
 /* update the wall */
 int main( ) {
    /* we set the mode to mode 0 with bg0 on */
@@ -489,7 +492,7 @@ int main( ) {
 
    char msg [32] = "Helicopter";
    uppercase(msg);
-   set_text(msg, 50, 50);
+   set_text(msg, 0, 0);
 
    /* create the koopa */
    /*struct Wall wallA;
@@ -554,7 +557,7 @@ int main( ) {
 		//copter moves up and down decent. starts choppy, but get smoother the longer the game runs
         /* wait for vblank before scrolling and moving sprites */
         wait_vblank();
-       // *bg0_x_scroll = xscroll;
+        *bg0_x_scroll = xscroll;
         sprite_update_all();
 
         /* delay some */
