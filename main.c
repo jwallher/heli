@@ -358,7 +358,7 @@ void wall_init(struct Wall* wall, int x, int y) {
      //wall->sprite = sprite_init(wall->x + 60, wall->y -30, SIZE_16_16, 0, 0, wall->frame, 0);
      //wall->sprite = sprite_init(wall->x + 120, wall->y +30, SIZE_16_16, 0, 0, wall->frame, 0);
 }
-
+/*
 int wall_left(struct Wall* wal){
 	//wal->move = 1;
 	if(wal->x<0){
@@ -371,6 +371,11 @@ int wall_left(struct Wall* wal){
 		wal->x--;
 		return 0;
 	}
+}*/
+int wallLeft(int curX, int origX);
+
+void wall_left(struct Wall *wall){
+	wall->x = wallLeft(wall->x, wall->origx);
 }
 
 
